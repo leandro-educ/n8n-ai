@@ -123,7 +123,7 @@ qwen3:4b
 
 ---
 
-## 5. Acceder al panel n8n
+## 5. Acceder al panel n8n (IMPORTANTE)
 
 Sólo desde la misma PC Ubuntu:
 
@@ -136,6 +136,8 @@ También sirve:
 ```text
 http://localhost:5678
 ```
+                          Para resetear el usuario: docker compose exec n8n n8n user-management:reset
+                          Luego:   docker compose restart n8n
 
 IMPORTANTE:
 
@@ -411,3 +413,55 @@ es la barrera que evita publicar accidentalmente el editor n8n en la LAN.
 
 Cloudflare no necesita ese puerto. Cloudflare llega a `ia_service`
 por una red Docker compartida con `cloudflared`.
+
+
+----------------------------------------------------
+----------------------------------------------------
+
+Chatear directamente con Ollama:
+
+----------------------------------------------------
+----------------------------------------------------
+
+Primero mirá qué modelos tenés descargados:
+
+docker exec -it n8n_ollama ollama list
+
+Vas a obtener algo parecido a:
+
+NAME              ID              SIZE
+llama3.2:3b       ...             2.0 GB
+qwen2.5:7b        ...             4.7 GB
+
+EJECUCION
+Luego podés conversar directamente con uno:
+
+    >>>>     docker exec -it n8n_ollama ollama run llama3.2:3b
+
+        este es un modelo mas nuevo que tambien tengo instalado:
+
+    >>>>     docker compose exec ollama ollama run qwen3:4b
+
+    >>>> Otro modelo mas nuevo y el que mejor razonamiento tiene es:
+
+         docker exec -it n8n_ollama ollama run qwen3.5:9b 
+
+   \bye
+
+Y quedás en modo interactivo:
+
+>>> ¿Qué es la programación orientada a objetos?
+
+Para salir:
+
+/bye
+Hacer una sola pregunta desde Bash
+
+También podés hacer:
+
+docker compose exec ollama ollama run qwen3:4b --think=false "Hola"
+
+
+docker exec -it n8n_ollama ollama run llama3.2:3b \
+"Explicame qué es Docker en pocas palabras"
+

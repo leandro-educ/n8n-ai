@@ -25,9 +25,17 @@ services:
     image: ollama/ollama:latest
     container_name: n8n_ollama
     restart: unless-stopped
+    gpus: all
+
+    # Publica la API de Ollama únicamente en el propio Ubuntu.
+    # No queda accesible desde otros equipos de la LAN ni desde Internet.
+    ports:
+      - "127.0.0.1:11434:11434"
+
     environment:
       OLLAMA_NO_CLOUD: "1"
-      OLLAMA_KEEP_ALIVE: "10m"
+      OLLAMA_KEEP_ALIVE: "2m"
+      OLLAMA_MAX_LOADED_MODELS: "1"
       TZ: ${TZ}
     volumes:
       - ollama_data:/root/.ollama
@@ -159,11 +167,13 @@ networks:
   app_net:
     driver: bridge
 
-  # PostgreSQL y Ollama jamás se publican al host ni a Internet.
+  # PostgreSQL permanece aislado. Ollama usa esta red para comunicarse con n8n,
+  # pero su API también se publica sólo en 127.0.0.1:11434 del host.
   backend:
     driver: bridge
     internal: true
 
   model_egress:
     driver: bridge
+
 
