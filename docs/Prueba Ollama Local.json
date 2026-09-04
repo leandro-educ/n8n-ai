@@ -1,0 +1,89 @@
+{
+  "name": "Prueba Ollama Local",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        352,
+        128
+      ],
+      "id": "e61cc69d-28e6-4d41-be33-961490c63de0",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "MJMY7kgp0ujIUnv8",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Respondé en cuatro palabras:\ncuales son los pilares de la programacion orientada a objetos",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "34b535a6-cc53-456b-b451-5ff7d7177d9d",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        -80
+      ],
+      "id": "4b0b0447-8adf-47f0-a651-3e62a1a1ca15",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fec36558-ddc6-4f6d-a096-bca6f7ea032f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d03aeb6452f4731d035b9feae68e1de7915a92dd7f2c9f31940e074a9011a822"
+  },
+  "nodeGroups": [],
+  "id": "d6Ec4vNGshboYurl",
+  "tags": []
+}

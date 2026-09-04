@@ -1,0 +1,80 @@
+{
+  "name": "Telegram Test",
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "={{ $vars.id_telgram_mio }}",
+        "text": "buenas",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "329f5375-cad1-489c-921f-a25fb9ccd318",
+      "name": "Send a text message",
+      "webhookId": "be2be558-1874-4430-b834-c9aa580e1882",
+      "credentials": {
+        "telegramApi": {
+          "id": "PYnwfGJzp59SRNmI",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "227937f3-7d06-48fe-b4c2-3e513cef8d8a",
+      "name": "Telegram Trigger",
+      "webhookId": "0956a189-903c-4334-a86e-f986852d2cbb",
+      "credentials": {
+        "telegramApi": {
+          "id": "PYnwfGJzp59SRNmI",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "129f924b-39cc-4636-984e-53b96fc07ff5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "427fe45161e7a2be8e307827d7c68a45158c0e797a10d33bb81622e7eb37fcea"
+  },
+  "nodeGroups": [],
+  "id": "UDyoKgrnzXnLtck2",
+  "tags": []
+}

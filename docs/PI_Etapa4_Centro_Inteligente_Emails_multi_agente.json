@@ -1,0 +1,1053 @@
+{
+  "name": "PI_Etapa4_Centro_Inteligente_Emails_multi_agente",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "includeSpamTrash": false,
+          "readStatus": "unread"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        192,
+        -128
+      ],
+      "id": "e3d03fb4-d575-496e-8bfa-cafbbb31d1b4",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XDQIt7s0VVZkTvoR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        544,
+        160
+      ],
+      "id": "37e6864a-1821-48ea-b28d-32990eaae7f4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CBvzmSa5vqdMdP65",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "nicolasriquelme528@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nicolasriquelme528@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('attendees0_Attendees', ``, 'string') }}"
+          ],
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1584,
+        -544
+      ],
+      "id": "658bff51-3427-42b7-9d6d-e666e780a06a",
+      "name": "create_calendar_event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "GR4KfVcpIQOQzzyA",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "nicolasriquelme528@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nicolasriquelme528@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1616,
+        -176
+      ],
+      "id": "c98b47f6-eed1-4f95-80b1-392bb1846f88",
+      "name": "get_calendar_events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "GR4KfVcpIQOQzzyA",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "nicolasriquelme528@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nicolasriquelme528@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Time', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Time', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1744,
+        -208
+      ],
+      "id": "d83b4064-316e-415e-abef-9e248fa3e8c9",
+      "name": "cheack_availability",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "GR4KfVcpIQOQzzyA",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "nicolasriquelme528@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nicolasriquelme528@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1424,
+        -528
+      ],
+      "id": "d0703567-6711-4570-ac66-8800339f409b",
+      "name": "find_available_slots",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "GR4KfVcpIQOQzzyA",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI",
+          "mode": "list",
+          "cachedResultName": "curso",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 140304861,
+          "mode": "list",
+          "cachedResultName": "mails_procesados",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI/edit#gid=140304861"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id', ``, 'string') }}",
+            "fecha de procesamiento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fecha_de_procesamiento', ``, 'string') }}",
+            "remitente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('remitente', ``, 'string') }}",
+            "asunto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('asunto', ``, 'string') }}",
+            "categoría": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('categor_a', ``, 'string') }}",
+            "prioridad": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('prioridad', ``, 'string') }}",
+            "respuesta generada": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('respuesta_generada', ``, 'string') }}",
+            "reunión detectada": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('reuni_n_detectada', ``, 'string') }}",
+            "evento creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('evento_creado', ``, 'string') }}",
+            "requiere revisión humana": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('requiere_revisi_n_humana', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha de procesamiento",
+              "displayName": "fecha de procesamiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "remitente",
+              "displayName": "remitente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "asunto",
+              "displayName": "asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "categoría",
+              "displayName": "categoría",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "respuesta generada",
+              "displayName": "respuesta generada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reunión detectada",
+              "displayName": "reunión detectada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "evento creado",
+              "displayName": "evento creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "requiere revisión humana",
+              "displayName": "requiere revisión humana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1552,
+        336
+      ],
+      "id": "72cb01de-fc9d-4773-a556-cd274e78b530",
+      "name": "registrar_mail",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cbAHqHX51WHnrZvA",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI",
+          "mode": "list",
+          "cachedResultName": "curso",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 140304861,
+          "mode": "list",
+          "cachedResultName": "mails_procesados",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI/edit#gid=140304861"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id",
+              "lookupValue": "={{ $('procesar_data_email').item.json.email.id }}"
+            },
+            {
+              "lookupColumn": "id",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values1_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        144
+      ],
+      "id": "1fac5545-5765-4f36-8380-f149070a602a",
+      "name": "buscar_mail",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cbAHqHX51WHnrZvA",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$vars.id_telegram_mio}}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        1728,
+        240
+      ],
+      "id": "bc42e086-6146-4226-ada7-da5bb75cfd34",
+      "name": "notificacion",
+      "webhookId": "b161b3e9-e4b3-4a35-a20b-ec0e6bea870b",
+      "credentials": {
+        "telegramApi": {
+          "id": "PYnwfGJzp59SRNmI",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI",
+          "mode": "list",
+          "cachedResultName": "curso",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 140304861,
+          "mode": "list",
+          "cachedResultName": "mails_procesados",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u6vddK6t3XHr9gckFwrQ3bBkWP_wAYIf2CF-DL7cAnI/edit#gid=140304861"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id', ``, 'string') }}",
+            "fecha de procesamiento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fecha_de_procesamiento', ``, 'string') }}",
+            "remitente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('remitente', ``, 'string') }}",
+            "asunto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('asunto', ``, 'string') }}",
+            "categoría": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('categor_a', ``, 'string') }}",
+            "prioridad": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('prioridad', ``, 'string') }}",
+            "respuesta generada": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('respuesta_generada', ``, 'string') }}",
+            "reunión detectada": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('reuni_n_detectada', ``, 'string') }}",
+            "evento creado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('evento_creado', ``, 'string') }}",
+            "requiere revisión humana": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('requiere_revisi_n_humana', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha de procesamiento",
+              "displayName": "fecha de procesamiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "remitente",
+              "displayName": "remitente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "asunto",
+              "displayName": "asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "categoría",
+              "displayName": "categoría",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "respuesta generada",
+              "displayName": "respuesta generada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reunión detectada",
+              "displayName": "reunión detectada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "evento creado",
+              "displayName": "evento creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "requiere revisión humana",
+              "displayName": "requiere revisión humana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        -528
+      ],
+      "id": "ee5447f7-611e-4eaa-9759-9acddc387586",
+      "name": "registrar_mail1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "cbAHqHX51WHnrZvA",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "html",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "replyTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Send_Replies_To', ``, 'string') }}",
+          "threadId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Thread_ID', ``, 'string') }}",
+          "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To_Email', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        400
+      ],
+      "id": "2c6cb757-3d16-4a1b-b1bb-264378dfc6ad",
+      "name": "borrador_respuesta",
+      "webhookId": "0c8f6442-bcd0-4573-8ca6-919e93692fff",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XDQIt7s0VVZkTvoR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        304
+      ],
+      "id": "13e1181f-5d8d-4dc8-b376-b248d96d0247",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CBvzmSa5vqdMdP65",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Rol\nEres un Agente Derivador de Tareas experto en clasificar y enrutar correos electrónicos entrantes. \nTu única función es analizar el asunto y el cuerpo del correo, verificar si ya fue procesado, y decidir qué agente especializado debe hacerse cargo.\n\n# Herramientas (Tools)\nAntes de tomar una decisión, utiliza obligatoriamente la herramienta `buscar_mail` buscando el ID del correo.\n- Si la herramienta indica que el correo YA existe, tu decisión final debe ser \"NINGUNO\".\n- Si NO existe, procede a evaluar el contenido.\n\n# Criterios de Enrutamiento\nEvalúa el contenido del correo para asignarlo a una de las siguientes rutas:\n\n1. **CALENDARIO**: Selecciona esta ruta si el correo menciona explícitamente intenciones de:\n   - Agendar, cancelar, reprogramar o coordinar una reunión/llamada.\n   - Consultar disponibilidad de horarios o fechas.\n   - Solicitar espacios libres.\n   - Menciones a agendas, Google Meet, Zoom o citas.\n2. **GENERAL**: Selecciona esta ruta si el correo aborda cualquier otro tema (soporte técnico, consultas de ventas, envío de facturas, adjuntos para revisión, consultas generales, etc.) que no requiera interactuar con la agenda.\n\n# Reglas de Salida\nTu única respuesta debe ser un objeto JSON estricto. No incluyas explicaciones, saludos ni texto fuera del JSON. Debes conservar el objeto del correo original dentro de tu respuesta para mantener el contexto.\n\nFormato de salida requerido:\n{\n  \"agente_destino\": \"CALENDARIO\" | \"GENERAL\" | \"NINGUNO\",\n  \"justificacion\": \"Breve explicación de 1 línea de por qué se eligió esta ruta\",\n  \"datos_correo\": {\n     // Inserta aquí exactamente el mismo objeto JSON del correo de entrada\n  }\n}\n\n# Datos de Entrada\nCorreo a evaluar:\n{{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        640,
+        -128
+      ],
+      "id": "866faa29-9af4-4e10-9a11-d3e09751e954",
+      "name": "agente_derivador",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Rol\nEres un Asistente Ejecutivo de Inteligencia Artificial especializado en atención general. \nRecibes correos electrónicos que NO están relacionados con el calendario, los analizas, los clasificas, generas respuestas adecuadas, los registras y emites alertas si es necesario.\n\n# Flujo de Trabajo Obligatorio\n\n1. **Clasificación:**\n   Analiza el texto y clasifica el correo en UNA de estas categorías: `URGENTE`, `SOPORTE`, `VENTAS`, `INFORMATIVO`, `PERSONAL`.\n   - Determina la `prioridad` (Alta, Media, Baja).\n   - Determina si `requiere_revision_humana` (true si es urgente, complejo, ambiguo o incluye facturas/adjuntos sensibles).\n\n2. **Generación de Respuesta (Tool: `borrador_respuesta`):**\n   Si el correo requiere respuesta, crea un borrador.\n   - Responde directamente a las consultas.\n   - Si la información provista (o el adjunto) es insuficiente para resolver el pedido, redacta un borrador pidiendo los datos faltantes.\n   - Tono: Profesional y cercano. NO inventes información.\n\n  Si el correo tiene archivos adjuntos que sean imagenes o pdfs utiliza la data binaria que esta más abajo para procesar la información y poder esponder.\n\n3. **Registro (Tool: `registrar_mail`):**\n   Registra el procesamiento en Google Sheets con los datos: id, fecha de procesamiento, remitente, asunto, categoría, prioridad, booleano de respuesta generada, y si requiere revisión humana. (Los campos de reuniones envíalos como `false`).\n\n4. **Notificación (Tool: `enviar_notificacion_telegram`):**\n   Si la categoría es URGENTE, la prioridad es Alta, o requiere revisión humana, envía un mensaje de Telegram.\n   - Incluye: Remitente, Asunto, Categoría, Prioridad, Resumen breve de qué trata, y Acción recomendada para el humano.\n\n# Salida Esperada\nAl finalizar las acciones, tu única salida de texto debe ser un resumen JSON:\n{\n  \"id_mail\": \"id_del_correo\",\n  \"categoria\": \"CATEGORIA\",\n  \"accion_tomada\": \"Borrador generado y notificado por Telegram\"\n}\n\n# Datos de Entrada\nCorreo a procesar:\n{{ JSON.stringify($json.datos_correo) }}\ndata binaria del adjunto: \n{{ JSON.stringify($node[\"procesar_data_email\"].binary)}}",
+        "options": {
+          "passthroughBinaryImages": true,
+          "passthroughBinaryPdfs": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1424,
+        64
+      ],
+      "id": "8e3f3c3f-d6b1-455f-b5a0-541314a7f587",
+      "name": "agente_general"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Rol\nEres un Asistente de Gestión de Agenda integrado con Google Calendar. \nTu función exclusiva es gestionar solicitudes de reuniones, buscar disponibilidad y responder correos relacionados con el tiempo y la agenda del usuario.\n\n# Herramientas de Calendario Disponibles\n- `get_calendar_events`: Para saber qué reuniones hay en un rango de fechas.\n- `check_availability`: Para comprobar si una fecha/hora específica está libre.\n- `find_available_slots`: Para buscar huecos libres según duración y rango de fechas.\n- `create_calendar_event`: Para agendar la reunión (SOLO si tienes fecha, hora de inicio, fin/duración y título confirmados, y tras verificar que el espacio está libre).\n\n# Reglas de Calendario\n- Usa la fecha actual ({{ $now }}) como referencia temporal.\n- NUNCA asumas que un horario está libre sin usar `check_availability` o `find_available_slots`.\n- Si el usuario pide agendar pero no especifica hora, busca espacios libres y ofrécelos.\n- NUNCA inventes eventos ni confirmes reuniones que no hayan sido creadas exitosamente por la tool.\n\n# Flujo de Trabajo Obligatorio\n\n1. **Análisis de Agenda:**\n   Comprende qué pide el usuario (agendar, consultar, reprogramar) y ejecuta las herramientas de calendario pertinentes para resolver la solicitud o encontrar los horarios.\n\n2. **Generación de Respuesta (Tool: `borrador_respuesta1`):**\n   Crea el borrador del correo.\n   - Si faltan datos o se proponen horarios: Pídelos u ofrécelos claramente en el correo (ej. \"Tengo disponibilidad el martes a las 10:00 o a las 15:00. ¿Cuál prefieres?\").\n   - Si se agendó exitosamente: Confírmalo en el borrador.\n\n3. **Registro (Tool: `registrar_mail1`):**\n   Registra el correo procesado en Google Sheets.\n   - Llena los datos básicos (id, fecha, remitente, asunto).\n   - Asigna categoría (`REUNIÓN`), prioridad.\n   - `reunion_detectada`: true.\n   - `evento_creado`: true/false (según si usaste la tool de crear).\n\n4. **Notificación (Tool: `notificacion1`):**\n   Si hubo un error, si un evento importante se superpone, o si se requiere que un humano negocie el horario directamente, envía una alerta por Telegram con el resumen y la acción recomendada.\n\n# Salida Esperada\nAl finalizar todas las acciones con las herramientas, tu única salida de texto debe ser un resumen JSON:\n{\n  \"id_mail\": \"id_del_correo\",\n  \"estado_agenda\": \"Horarios propuestos\" | \"Reunión agendada\" | \"Consulta respondida\",\n  \"evento_creado\": true | false\n}\n\n# Datos de Entrada\nFecha y hora actual: {{ $now }}\nCorreo a procesar:\n{{ JSON.stringify($json.datos_correo) }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1440,
+        -384
+      ],
+      "id": "390ae2a2-e7ec-4575-b3e3-21f53381aca0",
+      "name": "agente_calendario"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$vars.id_telegram_mio}}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        1504,
+        -224
+      ],
+      "id": "bc119633-33e4-4f2c-bfe5-266824048647",
+      "name": "notificacion1",
+      "webhookId": "b161b3e9-e4b3-4a35-a20b-ec0e6bea870b",
+      "credentials": {
+        "telegramApi": {
+          "id": "PYnwfGJzp59SRNmI",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1408,
+        -160
+      ],
+      "id": "0b88214c-ded7-4919-9360-dafda911ca09",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CBvzmSa5vqdMdP65",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.agente_destino }}",
+                    "rightValue": "CALENDARIO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "dbfc115e-0f22-4e5c-bb77-d963d338aa64"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f675e259-c971-4edd-bfdd-de70eb2c6355",
+                    "leftValue": "={{ $json.agente_destino }}",
+                    "rightValue": "GENERAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1168,
+        -112
+      ],
+      "id": "32fbacb8-42f1-4c2c-83e7-cdfe6a23ad13",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  try {\n    // Extraemos el string de la propiedad 'output'\n    const jsonString = item.json.output;\n    \n    // Lo convertimos a un objeto de JavaScript\n    const parsedData = JSON.parse(jsonString);\n    \n    // Devolvemos el objeto parseado para usarlo en el flujo\n    return {\n      json: parsedData\n    };\n  } catch (error) {\n    // Manejo de errores por si el LLM devuelve un formato inválido\n    throw new Error(\"El agente no devolvió un JSON válido: \" + error.message);\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -112
+      ],
+      "id": "10719587-2cf9-47d0-9c68-916b7c9e367c",
+      "name": "procesar_respuesta_agente_derivador"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nfor (const item of $input.all()) {\n  const binaries = item.binary ?? {};\n  const binaryEntries = Object.entries(binaries);\n  const hasAttachments = binaryEntries.length > 0;\n\n  if (hasAttachments) {\n    // Si tiene adjuntos, procesa cada uno\n    for (const [key, binary] of binaryEntries) {\n      output.push({\n        json: {\n          hasAttachments: true,\n          email: {\n            id: item.json.id,\n            threadId: item.json.threadId,\n            messageId: item.json.messageId,\n            subject: item.json.subject,\n            date: item.json.date,\n            from: item.json.from,\n            to: item.json.to,\n            text: item.json.text,\n          },\n          attachment: {\n            key,\n            fileName: binary.fileName,\n            mimeType: binary.mimeType,\n            fileExtension: binary.fileExtension,\n          },\n        },\n        binary: {\n          data: binary,\n        },\n      });\n    }\n  } else {\n    // Si no tiene adjuntos, emite el mail para no perderlo\n    output.push({\n      json: {\n        hasAttachments: false,\n        email: {\n          id: item.json.id,\n          threadId: item.json.threadId,\n          messageId: item.json.messageId,\n          subject: item.json.subject,\n          date: item.json.date,\n          from: item.json.from,\n          to: item.json.to,\n          text: item.json.text,\n        },\n        attachment: null,\n      },\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        -128
+      ],
+      "id": "81c9ada9-8e1a-4b54-b4a9-76eb69d434ab",
+      "name": "procesar_data_email"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "html",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "replyTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Send_Replies_To', ``, 'string') }}",
+          "threadId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Thread_ID', ``, 'string') }}",
+          "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To_Email', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        1232,
+        -384
+      ],
+      "id": "eba0e700-7962-4113-8b8a-48f604ce3197",
+      "name": "borrador_respuesta1",
+      "webhookId": "0c8f6442-bcd0-4573-8ca6-919e93692fff",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XDQIt7s0VVZkTvoR",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "procesar_data_email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "agente_derivador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_calendar_events": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cheack_availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_available_slots": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "registrar_mail": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_general",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_mail": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_derivador",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "notificacion": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_general",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "borrador_respuesta": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_general",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "agente_general",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agente_general": {
+      "main": [
+        []
+      ]
+    },
+    "registrar_mail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "notificacion1": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agente_derivador": {
+      "main": [
+        [
+          {
+            "node": "procesar_respuesta_agente_derivador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "procesar_respuesta_agente_derivador": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "procesar_data_email": {
+      "main": [
+        [
+          {
+            "node": "agente_derivador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "agente_general",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "borrador_respuesta1": {
+      "ai_tool": [
+        [
+          {
+            "node": "agente_calendario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "15b39e93-db90-49b7-9dce-ce3068deaddf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "427fe45161e7a2be8e307827d7c68a45158c0e797a10d33bb81622e7eb37fcea"
+  },
+  "nodeGroups": [],
+  "id": "ekSw5iaKx1Npp1ju",
+  "tags": []
+}

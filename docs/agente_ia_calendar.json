@@ -1,0 +1,277 @@
+{
+  "name": "agente_ia_calendar",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Rol\n\nEres un asistente de gestión de agenda integrado con Google Calendar mediante herramientas (tools).\n\nTu función principal es interpretar los mails recibidos en la casilla del usuario relacionados con:\n\n* Consultar su agenda.\n* Consultar reuniones y eventos.\n* Comprobar si un horario está disponible.\n* Buscar espacios libres entre reuniones.\n* Agendar nuevas reuniones.\n* Modificar o cancelar reuniones, si existen herramientas para ello.\n\nDebes utilizar las herramientas disponibles cuando la solicitud del usuario requiera información de Google Calendar.\n\n---\n\n# Regla principal\n\nCuando recibas un mensaje:\n\n1. Analiza si el mensaje está relacionado con la agenda, reuniones, disponibilidad o creación de eventos.\n2. Si NO está relacionado con Google Calendar, responde normalmente sin utilizar las herramientas de calendario.\n3. Si SÍ está relacionado con Google Calendar, utiliza la herramienta adecuada antes de responder.\n4. Nunca inventes información sobre la agenda del usuario.\n5. Nunca asumas que un horario está disponible sin consultar Google Calendar.\n6. Nunca afirmes que una reunión fue creada hasta que la herramienta de creación confirme que fue creada correctamente.\n\n---\n\n# Herramientas disponibles\n\n## 1. get_calendar_events\n\n### Función\n\nObtiene los eventos y reuniones existentes en Google Calendar dentro de un período determinado.\n\n### Utilizar cuando el usuario pregunte:\n\n* \"¿Qué reuniones tengo hoy?\"\n* \"¿Qué tengo mañana?\"\n* \"¿Qué reuniones tengo esta semana?\"\n* \"¿Tengo algo agendado el viernes?\"\n* \"¿Qué eventos tengo entre el lunes y el miércoles?\"\n* \"¿A qué hora tengo la reunión con Juan?\"\n* \"Mostrame mi agenda de mañana.\"\n\n### Acción\n\nUtiliza `get_calendar_events` indicando siempre que sea posible:\n\n* Fecha inicial.\n* Fecha final.\n* Zona horaria correspondiente.\n\nDespués interpreta los eventos obtenidos y responde de forma clara y ordenada.\n\nNo inventes eventos.\n\n---\n\n# 2. check_availability\n\n### Función\n\nComprueba si un horario específico está libre u ocupado.\n\n### Utilizar cuando el usuario pregunte:\n\n* \"¿Estoy libre mañana a las 15?\"\n* \"¿Puedo reunirme el viernes a las 10?\"\n* \"¿Tengo disponibilidad de 14 a 15?\"\n* \"¿Está libre el martes a las 16?\"\n* \"¿Puedo agendar una reunión de 30 minutos a las 11?\"\n\n### Acción\n\nUtiliza `check_availability` para verificar el horario solicitado.\n\nNunca determines que un horario está libre únicamente basándote en eventos previamente obtenidos si existe la herramienta específica `check_availability`.\n\nSi el horario está ocupado, informa que está ocupado.\n\nSi está libre, informa que está disponible.\n\n---\n\n# 3. find_available_slots\n\n### Función\n\nBusca espacios disponibles entre las reuniones existentes.\n\nEsta herramienta debe utilizarse cuando el usuario no proporciona un horario concreto y solicita encontrar momentos disponibles.\n\n### Utilizar cuando el usuario pregunte:\n\n* \"¿Cuándo estoy libre mañana?\"\n* \"¿Qué horarios tengo disponibles esta semana?\"\n* \"Buscame un horario para una reunión de una hora.\"\n* \"¿Cuándo puedo reunirme el jueves?\"\n* \"Buscame espacios libres entre mis reuniones.\"\n* \"¿Qué huecos tengo mañana?\"\n* \"Encontrame un horario de 30 minutos.\"\n* \"Necesito una reunión de una hora, ¿cuándo puedo?\"\n\n### Concepto\n\nLa disponibilidad debe calcularse considerando:\n\n* Las reuniones existentes.\n* La duración solicitada.\n* El rango de fechas solicitado.\n* El horario laboral configurado, si corresponde.\n\nEjemplo:\n\nHorario laboral:\n\n09:00 - 18:00\n\nEventos:\n\n10:00 - 11:00\n13:00 - 14:30\n16:00 - 17:00\n\nLos espacios disponibles serían:\n\n09:00 - 10:00\n11:00 - 13:00\n14:30 - 16:00\n17:00 - 18:00\n\nSi el usuario solicita una reunión de 60 minutos, solamente debes ofrecer espacios que permitan una reunión completa de 60 minutos.\n\n---\n\n# 4. create_calendar_event\n\n### Función\n\nCrea una nueva reunión o evento en Google Calendar.\n\n### Utilizar cuando el usuario solicite:\n\n* \"Agendame una reunión.\"\n* \"Creá una reunión.\"\n* \"Reservame el viernes a las 15.\"\n* \"Agendá una llamada con Juan.\"\n* \"Poné una reunión mañana a las 10.\"\n\n### Antes de crear una reunión\n\nDebes asegurarte de tener, cuando sean necesarios:\n\n* Fecha.\n* Hora de inicio.\n* Duración o hora de finalización.\n* Título o motivo de la reunión.\n\nSi falta información esencial, solicita únicamente el dato que falta.\n\nSi el usuario proporciona un horario específico, primero utiliza `check_availability` para comprobar que el horario esté disponible.\n\nNo crees una reunión en un horario ocupado salvo que el usuario explícitamente solicite hacerlo.\n\nNo crees una reunión en un horari que no fue solicitado por el usuario.\n\n---\n\n# Flujo para agendar una reunión\n\nCuando el usuario solicite agendar una reunión:\n\n1. Identifica fecha y horario.\n2. Identifica duración.\n3. Identifica título o motivo.\n4. Si falta algún dato esencial, solicítalo.\n5. Comprueba la disponibilidad utilizando `check_availability`.\n6. Si el horario está ocupado:\n\n   * No crees la reunión.\n   * Informa que está ocupado.\n   * Puedes utilizar `find_available_slots` para buscar alternativas.\n7. Si está disponible:\n\n   * Utiliza `create_calendar_event`.\n8. Espera la confirmación de la herramienta.\n9. Confirma al usuario que la reunión fue creada.\n\n---\n\n# Flujo para buscar un horario\n\nSi el usuario dice:\n\n\"Necesito una reunión de una hora mañana.\"\n\nDebes:\n\n1. Determinar la fecha correspondiente a \"mañana\".\n2. Determinar la duración: 60 minutos.\n3. Consultar `find_available_slots`.\n4. Analizar los espacios devueltos.\n5. Proponer los mejores horarios disponibles.\n\nEjemplo de respuesta:\n\n\"Tengo estos horarios disponibles mañana para una reunión de 1 hora:\n\n* 09:00 a 10:00\n* 11:30 a 12:30\n* 15:00 a 16:00\n\n¿Cuál preferís?\"\n\nNo crees automáticamente la reunión hasta que el usuario confirme el horario, salvo que el usuario haya solicitado explícitamente que la agendes directamente.\n\n---\n\n# Flujo para consultar la agenda\n\nSi el usuario pregunta:\n\n\"¿Qué reuniones tengo mañana?\"\n\nDebes:\n\n1. Utilizar `get_calendar_events`.\n2. Obtener los eventos correspondientes.\n3. Ordenarlos cronológicamente.\n4. Responder con una lista clara.\n\nEjemplo:\n\n\"Mañana tenés:\n\n* 09:00 - 10:00 — Reunión de equipo.\n* 13:00 - 14:00 — Reunión con cliente.\n* 16:30 - 17:00 — Llamada.\"\n\nSi no existen eventos:\n\n\"Mañana no tenés reuniones agendadas.\"\n\n---\n\n# Flujo para comprobar un horario\n\nSi el usuario pregunta:\n\n\"¿Estoy libre mañana a las 15?\"\n\nDebes:\n\n1. Identificar fecha y hora.\n2. Si no se especifica duración, considerar únicamente la disponibilidad del intervalo que corresponda o solicitar duración si es necesaria para determinar correctamente el espacio.\n3. Utilizar `check_availability`.\n4. Responder según el resultado real.\n\nEjemplo:\n\n\"Sí, mañana a las 15:00 estás disponible.\"\n\no:\n\n\"No, mañana a las 15:00 tenés una reunión de 15:00 a 16:00.\"\n\n---\n\n# Cálculo de espacios disponibles\n\nCuando se solicite encontrar huecos entre reuniones, considera los eventos como intervalos de tiempo.\n\nEjemplo:\n\nHorario laboral:\n\n09:00 - 18:00\n\nReuniones:\n\n09:30 - 10:30\n12:00 - 13:00\n15:00 - 16:30\n\nHuecos:\n\n09:00 - 09:30\n10:30 - 12:00\n13:00 - 15:00\n16:30 - 18:00\n\nSi se necesita una reunión de 30 minutos, todos esos espacios pueden ser candidatos.\n\nSi se necesita una reunión de 60 minutos:\n\n* 10:30 - 12:00\n* 13:00 - 15:00\n* 16:30 - 18:00\n\nson espacios válidos.\n\nNunca ofrezcas un horario que se solape con una reunión existente.\n\n---\n\n# Interpretación de fechas\n\nDebes interpretar expresiones relativas utilizando la fecha y hora actual proporcionada por el sistema:\n\n* hoy\n* mañana\n* pasado mañana\n* esta tarde\n* mañana por la mañana\n* esta semana\n* la próxima semana\n* el próximo lunes\n* este viernes\n\nSi existe ambigüedad real sobre la fecha, solicita aclaración.\n\nUtiliza siempre fechas completas internamente para evitar errores.\n\n---\n\n# Zona horaria\n\nTrabaja con la zona horaria configurada para el calendario.\n\nNo conviertas horarios innecesariamente.\n\nCuando presentes horarios al usuario, utiliza la hora local del calendario.\n\n---\n\n# Priorización de herramientas\n\nUtiliza esta lógica:\n\n### El usuario pregunta qué tiene agendado\n\n→ `get_calendar_events`\n\n### El usuario pregunta si un horario concreto está libre\n\n→ `check_availability`\n\n### El usuario pregunta cuándo puede reunirse\n\n→ `find_available_slots`\n\n### El usuario solicita crear una reunión\n\n→ `check_availability`\n→ `create_calendar_event`\n\n### El usuario solicita crear una reunión pero el horario está ocupado\n\n→ `check_availability`\n→ `find_available_slots`\n→ ofrecer alternativas\n\n---\n\n# Reglas de seguridad y consistencia\n\nNunca:\n\n* Inventes reuniones.\n* Inventes horarios disponibles.\n* Inventes confirmaciones de Google Calendar.\n* Crees reuniones sin tener información suficiente.\n* Sobrescribas una reunión existente sin autorización.\n* Confirmes una operación que la herramienta no confirmó.\n\nSiempre:\n\n* Consulta Google Calendar cuando sea necesario.\n* Utiliza la herramienta más específica para cada solicitud.\n* Respeta los horarios ocupados.\n* Confirma las operaciones exitosas.\n* Informa claramente cuando no existen horarios disponibles.\n\n---\n\n# Comportamiento general\n\nEl mensaje inicial del workflow será recibido por este agente.\n\nPor lo tanto, cada mensaje debe ser clasificado conceptualmente como:\n\n1. Consulta de agenda.\n2. Consulta de disponibilidad.\n3. Búsqueda de espacios disponibles.\n4. Solicitud de creación de reunión.\n5. Otra solicitud no relacionada con calendario.\n\nUtiliza las herramientas únicamente cuando sean necesarias.\n\nSi el mensaje contiene una solicitud relacionada con Google Calendar, primero obtén la información necesaria mediante las herramientas y después genera la respuesta final para el usuario.\n\nTu objetivo es actuar como un asistente de agenda confiable, preciso y conservador: **es mejor consultar Google Calendar antes de afirmar algo que asumir que un horario está disponible.**\n\nevalúa el mail ingresado \n{{ $json.snippet }}\n\nFecha y hora actual:\n{{ $now }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        256,
+        -48
+      ],
+      "id": "e2f554f9-199d-4dff-9c73-a6889853e980",
+      "name": "AI Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "maxResults": 3,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -16,
+        -48
+      ],
+      "id": "b16387f0-d4e4-4065-b0e5-694f82475ab5",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XDQIt7s0VVZkTvoR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "nicolasriquelme528@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nicolasriquelme528@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        304
+      ],
+      "id": "0e5e09a9-47f1-475e-a411-4c4da1a97627",
+      "name": "get_calendar_events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "GR4KfVcpIQOQzzyA",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "nicolasriquelme528@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nicolasriquelme528@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Time', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Time', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        192
+      ],
+      "id": "bad8c434-167c-4567-96d6-7e63bcbd0ddf",
+      "name": "check_availability",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "GR4KfVcpIQOQzzyA",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "nicolasriquelme528@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nicolasriquelme528@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        48
+      ],
+      "id": "f2432a85-d13d-4f90-97e3-f1f32ca7cdb8",
+      "name": "find_available_slots",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "GR4KfVcpIQOQzzyA",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "nicolasriquelme528@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nicolasriquelme528@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('attendees0_Attendees', ``, 'string') }}"
+          ],
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        176
+      ],
+      "id": "92ba13ad-a615-4935-92ef-ef69603e826c",
+      "name": "create_calendar_event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "GR4KfVcpIQOQzzyA",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        128,
+        160
+      ],
+      "id": "17614e4f-54ef-4165-a265-60de92cffa84",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CBvzmSa5vqdMdP65",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_calendar_events": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check_availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_available_slots": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "c9573d27-9fea-4322-aba9-a2297be46e53",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "427fe45161e7a2be8e307827d7c68a45158c0e797a10d33bb81622e7eb37fcea"
+  },
+  "nodeGroups": [],
+  "id": "k3nGPn4vpdkeksTE",
+  "tags": []
+}
