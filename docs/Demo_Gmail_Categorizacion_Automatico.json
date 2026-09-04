@@ -1,0 +1,978 @@
+{
+  "name": "Demo Gmail Categorizacion - Automatico cada minuto v2",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        96
+      ],
+      "id": "eec82aa3-fd07-41a8-87de-e64766594033",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "MJMY7kgp0ujIUnv8",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analiza un correo y responde solamente con un objeto JSON válido.\n\nFECHA ACTUAL:\n{{ $now.setZone('America/Argentina/Buenos_Aires').toISO() }}\n\nCORREO:\n{{ JSON.stringify($json) }}\n\nCLASIFICACIÓN:\nElige exactamente una categoría:\nURGENTE, SOPORTE, VENTAS, INFORMATIVO o PERSONAL.\n\nElige exactamente una prioridad:\nAlta, Media o Baja.\n\nNunca devuelvas varias opciones, listas, barras ni el carácter \"|\".\n\nURGENTE solamente corresponde a riesgos graves, incidentes críticos,\nvencimientos inmediatos o pedidos explícitamente urgentes.\nUna reunión futura no es urgente por sí sola.\n\nCALENDARIO:\n- Horario concreto mencionado: COMPROBAR_HORARIO.\n- Consulta sobre eventos de un período: CONSULTAR_EVENTOS.\n- Solicitud de horarios libres sin hora concreta: BUSCAR_HUECOS.\n- Orden explícita de crear un evento con datos completos: CREAR_EVENTO.\n- Sin relación con calendario: NINGUNA.\n\nExtrae:\n- fecha_texto: fecha tal como aparece, por ejemplo \"mañana\" o \"10/09/2026\".\n- hora: formato HH:mm.\n- duracion_minutos: número entero.\n- titulo_evento: descripción breve.\n\nUsa null solamente cuando el dato no aparezca en el correo.\n\nEJEMPLO:\nSi un correo pregunta si estás disponible mañana a las 10:00 para una\nreunión de 30 minutos sobre un proyecto, el resultado correcto es:\n\n{\n  \"categoria\": \"PERSONAL\",\n  \"prioridad\": \"Media\",\n  \"requiere_respuesta\": true,\n  \"requiere_revision_humana\": false,\n  \"justificacion\": \"Solicita disponibilidad para una reunión futura\",\n  \"resumen_breve\": \"Solicita una reunión de 30 minutos\",\n  \"accion_recomendada\": \"Comprobar disponibilidad y responder\",\n  \"reunion_detectada\": true,\n  \"accion_calendario\": \"COMPROBAR_HORARIO\",\n  \"fecha_texto\": \"mañana\",\n  \"hora\": \"10:00\",\n  \"duracion_minutos\": 30,\n  \"titulo_evento\": \"Reunión sobre el proyecto\"\n}\n\nUtiliza el ejemplo solamente como guía. Analiza siempre el correo recibido.\nNo uses Markdown ni bloques de código.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Cumple las reglas de forma determinista. Devuelve exclusivamente un objeto JSON válido, sin Markdown ni explicaciones."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -400,
+        -96
+      ],
+      "id": "68baea1b-4fa5-426a-afae-36065b9d387a",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "111tbZ3RGvMIZFw1lmqGf9M_pepKeazF3XZoy6Yc_304",
+          "mode": "list",
+          "cachedResultName": "n8n_data_hub",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/111tbZ3RGvMIZFw1lmqGf9M_pepKeazF3XZoy6Yc_304/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "emails_procesados",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/111tbZ3RGvMIZFw1lmqGf9M_pepKeazF3XZoy6Yc_304/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1136,
+        -208
+      ],
+      "id": "ccf599a1-b975-4107-b9ed-7087c8e8d2b4",
+      "name": "Buscar ID en Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXoEZmXcYmzGQBLF",
+          "name": "Google Sheets con n8n-gmail"
+        }
+      },
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e6ffe84d-9655-4809-8984-fdffd72c54a5",
+              "leftValue": "={{ $json.es_duplicado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -656,
+        -208
+      ],
+      "id": "eeb4e3bc-247f-40ce-b484-03ec399009de",
+      "name": "¿Duplicado?",
+      "notes": "La expresión significa: “¿Existe un campo id en el resultado de Sheets?”."
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -336
+      ],
+      "id": "a89160d5-fab7-4141-86a5-449a337e37c1",
+      "name": "Finalizar: correo duplicado",
+      "notes": "Este nodo no modifica datos ni ejecuta ninguna acción. Su función es mostrar que la rama termina deliberadamente."
+    },
+    {
+      "parameters": {
+        "content": "CORREO DUPLICADO\n\nEl ID del correo ya existe en Google Sheets.\n\nEl flujo termina sin:\n- clasificar el correo;\n- consultar el calendario;\n- generar un borrador;\n- registrar nuevamente el mensaje."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -400
+      ],
+      "id": "79eb6147-ebd9-4ab7-b5f7-4a903c1c1bd0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/*\nLee todos los mensajes obtenidos por Gmail y todos los IDs registrados en Sheets.\nLa comparación se realiza explícitamente por ID y no depende del emparejamiento interno de n8n.\n*/\n\nconst mensajes = $('Mensajes Recibidos').all().map((item) => item.json);\nconst filasProcesadas = $input.all().map((item) => item.json);\n\nconst idsProcesados = new Set(\n  filasProcesadas\n    .map((fila) => String(fila.id ?? '').trim())\n    .filter(Boolean),\n);\n\nfunction limpiarPrefijo(valor, nombre) {\n  return String(valor ?? '')\n    .replace(new RegExp('^' + nombre + ':\\\\s*', 'i'), '')\n    .trim();\n}\n\nfunction obtenerHeader(correo, nombre) {\n  const buscado = nombre.toLowerCase();\n  const headers = correo.headers;\n\n  if (headers && !Array.isArray(headers) && typeof headers === 'object') {\n    const clave = Object.keys(headers).find(\n      (key) => key.toLowerCase() === buscado,\n    );\n\n    if (clave) {\n      const valor = Array.isArray(headers[clave])\n        ? headers[clave][0]\n        : headers[clave];\n      return limpiarPrefijo(valor, nombre);\n    }\n  }\n\n  const headersPayload = correo.payload?.headers;\n  if (Array.isArray(headersPayload)) {\n    const encontrado = headersPayload.find(\n      (header) => String(header.name ?? '').toLowerCase() === buscado,\n    );\n    if (encontrado) return String(encontrado.value ?? '').trim();\n  }\n\n  return '';\n}\n\nfunction datosDireccion(correo, valor, nombreHeader) {\n  if (valor && typeof valor === 'object') {\n    const primero = Array.isArray(valor)\n      ? valor[0]\n      : valor.value?.[0];\n\n    if (primero && typeof primero === 'object') {\n      return {\n        email: String(primero.address ?? '').trim(),\n        nombre: String(primero.name ?? '').trim(),\n      };\n    }\n  }\n\n  const texto = limpiarPrefijo(\n    valor || obtenerHeader(correo, nombreHeader),\n    nombreHeader,\n  );\n  const emailEncontrado = texto.match(\n    /[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i,\n  );\n  const email = emailEncontrado?.[0] ?? '';\n  const nombre = email\n    ? texto\n        .replace(email, '')\n        .replace(/[<>\"']/g, '')\n        .replace(/^[,;\\s]+|[,;\\s]+$/g, '')\n        .trim()\n    : '';\n\n  return { email, nombre };\n}\n\nfunction decodificarBase64Url(valor) {\n  if (!valor) return '';\n  try {\n    const normalizado = String(valor)\n      .replace(/-/g, '+')\n      .replace(/_/g, '/');\n    return Buffer.from(normalizado, 'base64').toString('utf8');\n  } catch {\n    return '';\n  }\n}\n\nfunction extraerCuerpo(parte, mimePreferido) {\n  if (!parte || typeof parte !== 'object') return '';\n\n  if (\n    String(parte.mimeType ?? '').toLowerCase() === mimePreferido &&\n    parte.body?.data\n  ) {\n    return decodificarBase64Url(parte.body.data);\n  }\n\n  for (const hija of parte.parts ?? []) {\n    const contenido = extraerCuerpo(hija, mimePreferido);\n    if (contenido) return contenido;\n  }\n\n  return '';\n}\n\nfunction convertirTexto(valor) {\n  if (valor === null || valor === undefined) return '';\n  if (typeof valor === 'string') return valor.trim();\n  if (Array.isArray(valor)) {\n    return valor.map(convertirTexto).filter(Boolean).join('\\n').trim();\n  }\n  if (typeof valor === 'object') {\n    if (typeof valor.text === 'string') return valor.text.trim();\n    if (typeof valor.value === 'string') return valor.value.trim();\n  }\n  return String(valor).trim();\n}\n\nfunction normalizarCorreo(correo) {\n  const id = String(correo.id ?? '').trim();\n  const remitente = datosDireccion(correo, correo.from, 'From');\n  const destinatario = datosDireccion(correo, correo.to, 'To');\n\n  const contenido =\n    convertirTexto(correo.text) ||\n    convertirTexto(correo.textPlain) ||\n    extraerCuerpo(correo.payload, 'text/plain') ||\n    convertirTexto(correo.html) ||\n    extraerCuerpo(correo.payload, 'text/html') ||\n    convertirTexto(correo.snippet);\n\n  let fechaEmail =\n    convertirTexto(correo.date) ||\n    obtenerHeader(correo, 'Date');\n\n  if (!fechaEmail && correo.internalDate) {\n    const fechaCalculada = new Date(Number(correo.internalDate));\n    if (!Number.isNaN(fechaCalculada.getTime())) {\n      fechaEmail = fechaCalculada.toISOString();\n    }\n  }\n\n  const messageId = limpiarPrefijo(\n    correo.messageId || obtenerHeader(correo, 'Message-ID'),\n    'Message-ID',\n  );\n\n  return {\n    json: {\n      id,\n      thread_id: String(correo.threadId ?? '').trim(),\n      message_id: messageId,\n      fecha_email: fechaEmail,\n      remitente_email: remitente.email,\n      destinatario_email: destinatario.email,\n      asunto: limpiarPrefijo(\n        correo.subject || obtenerHeader(correo, 'Subject'),\n        'Subject',\n      ),\n      contenido,\n      remitente_nombre: remitente.nombre,\n      es_duplicado: idsProcesados.has(id),\n    },\n  };\n}\n\nreturn mensajes.map(normalizarCorreo);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        -208
+      ],
+      "id": "b4d54bbb-c328-4a65-a7f0-3b921ed48dc5",
+      "name": "Preparar correo para IA"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "/*\nEl código JavaScript tiene dos objetivos:\n\nLimpiar la respuesta de Ollama: extrae el JSON aunque el modelo agregue texto o bloques Markdown.\nUnificar los datos: combina la clasificación de la IA con los datos originales del correo.\n\n*/\n\nconst respuesta =\n  $json.text ??\n  $json.output ??\n  $json.response ??\n  $json;\n\nlet resultadoIA;\n\nif (typeof respuesta === 'object' && respuesta !== null) {\n  resultadoIA = respuesta;\n} else {\n  const texto = String(respuesta).trim();\n\n  const inicio = texto.indexOf('{');\n  const final = texto.lastIndexOf('}');\n\n  if (inicio === -1 || final === -1 || final < inicio) {\n    throw new Error(\n      'La IA no devolvió un objeto JSON. Respuesta recibida: ' +\n      texto.slice(0, 500)\n    );\n  }\n\n  const jsonLimpio = texto.slice(inicio, final + 1);\n\n  try {\n    resultadoIA = JSON.parse(jsonLimpio);\n  } catch (error) {\n    throw new Error(\n      'La IA devolvió un JSON inválido: ' +\n      error.message +\n      '. Respuesta: ' +\n      jsonLimpio.slice(0, 500)\n    );\n  }\n}\n\nconst correoOriginal = $('Preparar correo para IA').item.json;\n\nreturn {\n  json: {\n    ...correoOriginal,\n    ...resultadoIA\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        -192
+      ],
+      "id": "d7408bf2-ef32-4f8a-843c-0dddcc970370",
+      "name": "Normalizar salida IA"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion_calendario }}",
+                    "rightValue": "NINGUNA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a7bcb90e-4a01-4070-b5ee-e8d62c2dbbcb"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ad62c3ab-4b47-4511-b522-eb4a684c19a2",
+                    "leftValue": "={{ $json.accion_calendario }}",
+                    "rightValue": "CONSULTAR_EVENTOS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0d9a9fce-70b9-447c-b3d5-75e9c581c950",
+                    "leftValue": "={{ $json.accion_calendario }}",
+                    "rightValue": "COMPROBAR_HORARIO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "635d2282-a974-4c0a-ae37-5c2e077e52fb",
+                    "leftValue": "={{ $json.accion_calendario }}",
+                    "rightValue": "BUSCAR_HUECOS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "50e39e17-a364-4588-b0f8-a80ad31cc72b",
+                    "leftValue": "={{ $json.accion_calendario }}",
+                    "rightValue": "CREAR_EVENTO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        -240
+      ],
+      "id": "32ec92df-2220-4540-9005-0faaac4c5c14",
+      "name": "Seleccionar acción de calendario"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "alvarezleandro.a@gmail.com",
+          "mode": "list",
+          "cachedResultName": "alvarezleandro.a@gmail.com"
+        },
+        "timeMin": "={{ $json.fecha_inicio }}",
+        "timeMax": "={{ $json.fecha_fin }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        -192
+      ],
+      "id": "17a41191-8c62-4264-9b41-7aa706b2253b",
+      "name": "Comprobar disponibilidad",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "rxRLNVe1OTObNqpC",
+          "name": "Google Calendar account"
+        }
+      },
+      "notes": "Repuestas esperadas:\n\ntrue: el horario está libre.\nfalse: existe un evento que ocupa total o parcialmente ese horario."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const ZONA_HORARIA = 'America/Argentina/Buenos_Aires';\n\n/**\n * Devuelve los datos originales indicando que la fecha\n * no pudo resolverse. No detiene todo el workflow.\n */\nfunction devolverError(mensaje) {\n  return {\n    json: {\n      ...$json,\n      fecha_inicio: null,\n      fecha_fin: null,\n      fecha_calendario_resuelta: false,\n      error_calendario: mensaje,\n      requiere_revision_humana: true,\n    },\n  };\n}\n\n/**\n * Convierte textos como \"mañana\" o \"miércoles\"\n * a una versión comparable sin mayúsculas ni acentos.\n */\nfunction normalizarTexto(valor) {\n  return String(valor ?? '')\n    .trim()\n    .toLowerCase()\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '');\n}\n\nconst fechaTexto = normalizarTexto($json.fecha_texto);\nconst horaTexto = String($json.hora ?? '').trim();\nconst duracion = Number($json.duracion_minutos);\n\n/*\n * Usamos la fecha de recepción del correo como referencia.\n * Si no existe o no es válida, utilizamos la fecha actual.\n */\nlet referencia = DateTime.fromISO(\n  String($json.fecha_email ?? ''),\n  { setZone: true }\n);\n\nif (!referencia.isValid) {\n  referencia = $now;\n}\n\nconst hoy = referencia\n  .setZone(ZONA_HORARIA)\n  .startOf('day');\n\nlet fechaBase = null;\n\n/*\n * 1. Resolver expresiones relativas.\n * Es importante evaluar \"pasado mañana\" antes que \"mañana\".\n */\nif (fechaTexto.includes('pasado manana')) {\n  fechaBase = hoy.plus({ days: 2 });\n} else if (fechaTexto.includes('manana')) {\n  fechaBase = hoy.plus({ days: 1 });\n} else if (fechaTexto.includes('hoy')) {\n  fechaBase = hoy;\n} else {\n  /*\n   * 2. Resolver fechas escritas explícitamente:\n   *    2026-09-05\n   *    05/09/2026\n   *    05-09-2026\n   */\n  const fechaISO = fechaTexto.match(\n    /\\b(\\d{4})-(\\d{2})-(\\d{2})\\b/\n  );\n\n  const fechaLocal = fechaTexto.match(\n    /\\b(\\d{1,2})[/-](\\d{1,2})[/-](\\d{4})\\b/\n  );\n\n  if (fechaISO) {\n    fechaBase = hoy.set({\n      year: Number(fechaISO[1]),\n      month: Number(fechaISO[2]),\n      day: Number(fechaISO[3]),\n    });\n  } else if (fechaLocal) {\n    fechaBase = hoy.set({\n      year: Number(fechaLocal[3]),\n      month: Number(fechaLocal[2]),\n      day: Number(fechaLocal[1]),\n    });\n  } else {\n    /*\n     * 3. Resolver días de la semana.\n     * Ejemplo: \"el próximo viernes\".\n     */\n    const diasSemana = {\n      lunes: 1,\n      martes: 2,\n      miercoles: 3,\n      jueves: 4,\n      viernes: 5,\n      sabado: 6,\n      domingo: 7,\n    };\n\n    const diaEncontrado = Object.keys(diasSemana).find(\n      dia => fechaTexto.includes(dia)\n    );\n\n    if (diaEncontrado) {\n      const diaObjetivo = diasSemana[diaEncontrado];\n\n      let diasHastaFecha =\n        (diaObjetivo - hoy.weekday + 7) % 7;\n\n      // Si hoy es ese día, interpretamos el próximo.\n      if (diasHastaFecha === 0) {\n        diasHastaFecha = 7;\n      }\n\n      fechaBase = hoy.plus({ days: diasHastaFecha });\n    }\n  }\n}\n\n/*\n * 4. Validaciones.\n */\nif (!fechaBase || !fechaBase.isValid) {\n  return devolverError(\n    `No se pudo interpretar la fecha: \"${$json.fecha_texto ?? ''}\"`\n  );\n}\n\nconst horaValida = horaTexto.match(\n  /^([01]?\\d|2[0-3]):([0-5]\\d)$/\n);\n\nif (!horaValida) {\n  return devolverError(\n    `La hora no es válida: \"${horaTexto}\". Se esperaba HH:mm`\n  );\n}\n\nif (!Number.isInteger(duracion) || duracion <= 0) {\n  return devolverError(\n    `La duración no es válida: \"${$json.duracion_minutos ?? ''}\"`\n  );\n}\n\n/*\n * 5. Construir el intervalo exacto.\n */\nconst inicio = fechaBase.set({\n  hour: Number(horaValida[1]),\n  minute: Number(horaValida[2]),\n  second: 0,\n  millisecond: 0,\n});\n\nconst fin = inicio.plus({\n  minutes: duracion,\n});\n\n/*\n * 6. Entregar los datos originales junto con\n * las fechas calculadas.\n */\nreturn {\n  json: {\n    ...$json,\n    fecha_inicio: inicio.toISO({\n      suppressMilliseconds: true,\n    }),\n    fecha_fin: fin.toISO({\n      suppressMilliseconds: true,\n    }),\n    fecha_calendario_resuelta: true,\n    error_calendario: null,\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -192
+      ],
+      "id": "fae283bf-0f6e-4145-9ad1-08167346de33",
+      "name": "Resolver fecha calendario"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Recuperar todos los datos anteriores del correo.\nconst datosCorreo =\n  $('Resolver fecha calendario').item.json;\n\n// Resultado entregado por Google Calendar.\nconst valorDisponibilidad = $json.available;\n\n// Aceptamos tanto booleanos como textos.\nconst resultadoValido =\n  valorDisponibilidad === true ||\n  valorDisponibilidad === false ||\n  valorDisponibilidad === 'true' ||\n  valorDisponibilidad === 'false';\n\nif (!resultadoValido) {\n  return {\n    json: {\n      ...datosCorreo,\n      disponibilidad_consultada: false,\n      horario_disponible: null,\n      error_calendario:\n        'Google Calendar no devolvió un valor de disponibilidad válido',\n      requiere_revision_humana: true,\n    },\n  };\n}\n\nconst horarioDisponible =\n  valorDisponibilidad === true ||\n  valorDisponibilidad === 'true';\n\nreturn {\n  json: {\n    ...datosCorreo,\n    disponibilidad_consultada: true,\n    horario_disponible: horarioDisponible,\n    error_calendario: null,\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        -192
+      ],
+      "id": "06a3f6ba-079c-4b56-96c6-71f5c7e93792",
+      "name": "Unificar disponibilidad con correo"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "db9a0e4a-b886-41a4-a7aa-eff6a3ea11dd",
+              "leftValue": "={{ $json.requiere_respuesta }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1088,
+        -192
+      ],
+      "id": "fc42d0ab-f428-4176-ad37-051a21054c38",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu única tarea es seleccionar una de las siguientes plantillas y devolverla en HTML.\n\nDATOS\n\nNombre: {{ $json.remitente_nombre }}\nFecha solicitada: {{ $json.fecha_texto }}\nHora solicitada: {{ $json.hora }}\nDuración: {{ $json.duracion_minutos }} minutos\nHorario disponible: {{ $json.horario_disponible }}\n\nPLANTILLA SI EL HORARIO ESTÁ DISPONIBLE\n\nSi \"Horario disponible\" es true, devuelve exactamente:\n\n<p>Hola {{ $json.remitente_nombre }}:</p>\n<p>El horario solicitado para {{ $json.fecha_texto }} a las {{ $json.hora }} está disponible.</p>\n<p>Si te parece bien, podemos confirmar la reunión.</p>\n<p>Saludos.</p>\n\nPLANTILLA SI EL HORARIO NO ESTÁ DISPONIBLE\n\nSi \"Horario disponible\" es false, devuelve exactamente:\n\n<p>Hola {{ $json.remitente_nombre }}:</p>\n<p>El horario solicitado para {{ $json.fecha_texto }} a las {{ $json.hora }} no está disponible.</p>\n<p>¿Podrías indicarme otros días u horarios posibles?</p>\n<p>Saludos.</p>\n\nREGLAS OBLIGATORIAS\n\n- Selecciona solamente una plantilla.\n- No modifiques las frases de la plantilla.\n- No agregues ni elimines párrafos.\n- No devuelvas Markdown.\n- No utilices bloques de código.\n- Devuelve únicamente el HTML.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Selecciona la plantilla correspondiente según el valor booleano recibido. Copia la plantilla literalmente, sustituyendo las variables. No agregues, elimines ni reformules su contenido."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1360,
+        -208
+      ],
+      "id": "a4583e30-e2fc-4a7e-ab6f-9aa26e74072b",
+      "name": "LLM: redactar respuesta HTML"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        48
+      ],
+      "id": "a5c5467e-7669-4e64-9f29-f22f869f4681",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "MJMY7kgp0ujIUnv8",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Recuperamos el correo y el resultado del calendario.\nconst datosCorreo =\n  $('Unificar disponibilidad con correo').item.json;\n\n// Recuperamos el HTML generado por Ollama.\nlet cuerpoHtml = String($json.text ?? '').trim();\n\n// Eliminamos bloques Markdown si Ollama los agregara accidentalmente.\ncuerpoHtml = cuerpoHtml\n  .replace(/^```(?:html)?\\s*/i, '')\n  .replace(/\\s*```$/i, '')\n  .trim();\n\n// Validaciones importantes.\nif (!cuerpoHtml) {\n  throw new Error(\n    'Ollama no generó contenido para el borrador'\n  );\n}\n\nconst destinatario =\n  String(datosCorreo.remitente_email ?? '').trim();\n\nif (!destinatario) {\n  throw new Error(\n    'No se encontró el correo del remitente'\n  );\n}\n\nconst threadId =\n  String(datosCorreo.thread_id ?? '').trim();\n\nif (!threadId) {\n  throw new Error(\n    'No se encontró el thread_id del correo'\n  );\n}\n\n// Evitamos generar asuntos como \"Re: Re: ...\".\nconst asuntoOriginal =\n  String(datosCorreo.asunto ?? '').trim();\n\nconst asuntoBorrador =\n  /^re\\s*:/i.test(asuntoOriginal)\n    ? asuntoOriginal\n    : `Re: ${asuntoOriginal}`;\n\nreturn {\n  json: {\n    ...datosCorreo,\n\n    // Campos preparados para Gmail.\n    destinatario_borrador: destinatario,\n    asunto_borrador: asuntoBorrador,\n    cuerpo_html: cuerpoHtml,\n    thread_id: threadId,\n\n    // Estado interno del procesamiento.\n    respuesta_preparada: true,\n    borrador_generado: false,\n    evento_creado: false,\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        -208
+      ],
+      "id": "52deb940-97cd-4cb3-904a-efc2153a09a8",
+      "name": "Preparar borrador Gmail"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.asunto_borrador }}",
+        "emailType": "html",
+        "message": "={{ $json.cuerpo_html }}",
+        "options": {
+          "threadId": "={{ $json.thread_id }}",
+          "sendTo": "={{ $json.destinatario_borrador }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        -208
+      ],
+      "id": "3f51e4cd-b8a8-4efd-a8cd-7ae271e8d366",
+      "name": "Crear borrador Gmail",
+      "webhookId": "594ed54b-b3c5-41bc-90d4-cece4ad6066f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ojZitnVu7xdRgSlP",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "La operación Draft → Create admite cuerpo HTML, destinatario y Thread ID para vincular el borrador con el hilo"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Recuperar los datos preparados antes de llamar a Gmail.\nconst datosCorreo =\n  $('Preparar borrador Gmail').item.json;\n\n// Intentar recuperar los identificadores devueltos por Gmail.\nconst draftId =\n  $json.id ??\n  $json.draftId ??\n  null;\n\nconst mensajeBorradorId =\n  $json.message?.id ??\n  $json.messageId ??\n  null;\n\nreturn {\n  json: {\n    ...datosCorreo,\n\n    // Información devuelta por Gmail.\n    draft_id: draftId,\n    mensaje_borrador_id: mensajeBorradorId,\n\n    // Estados del procesamiento.\n    respuesta_generada: true,\n    borrador_generado: true,\n    fecha_procesamiento: $now\n      .setZone('America/Argentina/Buenos_Aires')\n      .toISO(),\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        -208
+      ],
+      "id": "330fe3d7-763c-473d-a47e-666eafe7a90a",
+      "name": "Confirmar borrador generado"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "111tbZ3RGvMIZFw1lmqGf9M_pepKeazF3XZoy6Yc_304",
+          "mode": "list",
+          "cachedResultName": "n8n_data_hub",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/111tbZ3RGvMIZFw1lmqGf9M_pepKeazF3XZoy6Yc_304/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "emails_procesados",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/111tbZ3RGvMIZFw1lmqGf9M_pepKeazF3XZoy6Yc_304/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "fecha_procesamiento": "={{ $json.fecha_procesamiento ?? $now.setZone('America/Argentina/Buenos_Aires').toISO() }}",
+            "remitente": "={{ $json.remitente_email }}",
+            "asunto": "={{ $json.asunto }}",
+            "categoria": "={{ $json.categoria }}",
+            "prioridad": "={{ $json.prioridad }}",
+            "respuesta_generada": "={{ $json.respuesta_generada ?? false }}",
+            "reunion_detectada": "={{ $json.reunion_detectada ?? false }}",
+            "evento_creado": "={{ $json.evento_creado ?? false }}",
+            "requiere_revision_humana": "={{ $json.requiere_revision_humana ?? false }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "thread_id",
+              "displayName": "thread_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_email",
+              "displayName": "fecha_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_procesamiento",
+              "displayName": "fecha_procesamiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "remitente",
+              "displayName": "remitente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "asunto",
+              "displayName": "asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requiere_respuesta",
+              "displayName": "requiere_respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta_generada",
+              "displayName": "respuesta_generada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reunion_detectada",
+              "displayName": "reunion_detectada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "accion_calendario",
+              "displayName": "accion_calendario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evento_creado",
+              "displayName": "evento_creado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requiere_revision_humana",
+              "displayName": "requiere_revision_humana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notificacion_emitida",
+              "displayName": "notificacion_emitida",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "justificacion",
+              "displayName": "justificacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resumen_breve",
+              "displayName": "resumen_breve",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2304,
+        -192
+      ],
+      "id": "e859e0d4-2cc9-4223-ab8d-e559f372493d",
+      "name": "Registrar correo procesado",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXoEZmXcYmzGQBLF",
+          "name": "Google Sheets con n8n-gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1600,
+        -208
+      ],
+      "id": "ee77839b-1d61-4ecd-950f-747b2db8ccac",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -1376,
+        -208
+      ],
+      "id": "ac861da7-8945-49e1-ad55-e74c2336c4bc",
+      "name": "Mensajes Recibidos",
+      "webhookId": "057cb39b-6ef5-4dbd-b575-a684df005707",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ojZitnVu7xdRgSlP",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Normalizar salida IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar ID en Sheets": {
+      "main": [
+        [
+          {
+            "node": "Preparar correo para IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Duplicado?": {
+      "main": [
+        [
+          {
+            "node": "Finalizar: correo duplicado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar correo para IA": {
+      "main": [
+        [
+          {
+            "node": "¿Duplicado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar salida IA": {
+      "main": [
+        [
+          {
+            "node": "Seleccionar acción de calendario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seleccionar acción de calendario": {
+      "main": [
+        [],
+        [],
+        [
+          {
+            "node": "Resolver fecha calendario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolver fecha calendario": {
+      "main": [
+        [
+          {
+            "node": "Comprobar disponibilidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comprobar disponibilidad": {
+      "main": [
+        [
+          {
+            "node": "Unificar disponibilidad con correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificar disponibilidad con correo": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "LLM: redactar respuesta HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM: redactar respuesta HTML",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM: redactar respuesta HTML": {
+      "main": [
+        [
+          {
+            "node": "Preparar borrador Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar borrador Gmail": {
+      "main": [
+        [
+          {
+            "node": "Crear borrador Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear borrador Gmail": {
+      "main": [
+        [
+          {
+            "node": "Confirmar borrador generado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar borrador generado": {
+      "main": [
+        [
+          {
+            "node": "Registrar correo procesado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Mensajes Recibidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensajes Recibidos": {
+      "main": [
+        [
+          {
+            "node": "Buscar ID en Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}
